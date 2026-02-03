@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+@layer base {
+  body {
+    @apply font-sans antialiased;
+    @apply bg-gradient-to-b from-hot-blue-light to-white min-h-screen;
+  }
+}
