@@ -2,7 +2,6 @@ import useSWR from 'swr'
 import { useW3 } from '@storacha/ui-react'
 import type { AccountUsageGetSuccess, DailySnapshot } from '../types'
 import { rollupStorageEventsByDay } from '../lib/rollup'
-import { invokeWithExpiryCheck } from '../components/Authenticator'
 
 interface UseAccountUsageResult {
   data?: {
@@ -27,19 +26,17 @@ export function useAccountUsage(accountDID?: string): UseAccountUsageResult {
     async () => {
       if (!client || !accountDID) return null
 
-      return await invokeWithExpiryCheck(async () => {
-        // Invoke account/usage/get capability
-        const usageData = await client.capability.account.usage.get(accountDID as `did:mailto:${string}`)
+      // Invoke account/usage/get capability
+      const usageData = await client.capability.account.usage.get(accountDID as `did:mailto:${string}`)
 
-        // Roll up events into daily snapshots
-        const dailySnapshots = rollupStorageEventsByDay(usageData)
+      // Roll up events into daily snapshots
+      const dailySnapshots = rollupStorageEventsByDay(usageData)
 
-        return {
-          total: usageData.total,
-          daily: dailySnapshots,
-          raw: usageData,
-        }
-      })
+      return {
+        total: usageData.total,
+        daily: dailySnapshots,
+        raw: usageData,
+      }
     },
     {
       revalidateOnFocus: false,

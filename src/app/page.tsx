@@ -1,130 +1,190 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useW3 } from '@storacha/ui-react'
-import DashboardLayout from '../components/DashboardLayout'
+import Authenticator from '../components/Authenticator'
+import { usePlan } from '../hooks/usePlan'
 import { useAccountUsage } from '../hooks/useAccountUsage'
 import { useAccountEgress } from '../hooks/useAccountEgress'
-import { getLastMonthPeriod, formatDate, bytesToTiB } from '../lib/formatting'
 import { STORAGE_USD_PER_TIB, EGRESS_USD_PER_TIB } from '../lib/services'
-import { calculateTotalInvoice, formatPrice } from '../lib/pricing'
 
-export default function InvoicingPage() {
+export default function Dashboard() {
   const [{ accounts }] = useW3()
   const account = accounts[0]
   const accountDID = account?.did()
 
-  const period = getLastMonthPeriod()
+  // Create period from first of last complete month to first of current month
+  // Memoize to prevent continuous re-renders
+  const period = useMemo(() => {
+    const now = new Date()
+    const firstDayOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const firstDayOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    return {
+      from: firstDayOfLastMonth,
+      to: firstDayOfCurrentMonth
+    }
+  }, []) // Empty deps array means this only runs once
 
+  const { data: planData, isLoading: planLoading, error: planError } = usePlan(accountDID)
   const { data: usageData, isLoading: usageLoading, error: usageError } = useAccountUsage(accountDID)
   const { data: egressData, isLoading: egressLoading, error: egressError } = useAccountEgress(accountDID, period)
 
-  const isLoading = usageLoading || egressLoading
-  const error = usageError || egressError
+  // Debug logging
+  console.log('Dashboard state:', {
+    accountDID,
+    planData,
+    planLoading,
+    planError,
+    usageData: usageData?.total,
+    usageLoading,
+    usageError,
+    egressData,
+    egressLoading,
+    egressError
+  })
 
-  if (isLoading) {
-    return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hot-blue mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading invoice data...</p>
-          </div>
-        </div>
-      </DashboardLayout>
-    )
-  }
-
-  if (error) {
-    return (
-      <DashboardLayout>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <h2 className="text-red-800 font-bold mb-2">Error Loading Data</h2>
-          <p className="text-red-700">{error.message}</p>
-        </div>
-      </DashboardLayout>
-    )
-  }
-
-  const storageBytes = usageData?.total ?? 0
-  const egressBytes = egressData?.total ?? 0
-
-  console.log('Egress data:', egressData)
-
-  const invoice = calculateTotalInvoice(storageBytes, egressBytes)
+  const isLoading = planLoading || usageLoading || egressLoading
+  const error = planError || usageError || egressError
 
   return (
-    <DashboardLayout>
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Monthly Invoice</h2>
+    <Authenticator>
+      <div className="min-h-screen bg-gray-50 p-8">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl font-bold text-hot-blue mb-8">Storacha Customer Dashboard</h1>
 
-        {/* Period Info */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">Billing Period</h3>
-          <p className="text-gray-600">
-            {formatDate(period.from)} - {formatDate(period.to)}
-          </p>
-        </div>
+          {/* Account Info */}
+          <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Account</h2>
+            <p className="font-mono text-sm">{accountDID}</p>
+          </div>
 
-        {/* Invoice Table */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-hot-blue text-white">
-              <tr>
-                <th className="px-6 py-4 text-left font-semibold">Line Item</th>
-                <th className="px-6 py-4 text-right font-semibold">Quantity</th>
-                <th className="px-6 py-4 text-right font-semibold">Unit Price</th>
-                <th className="px-6 py-4 text-right font-semibold">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* Storage Line Item */}
-              <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 font-medium text-gray-800">Storage Use</td>
-                <td className="px-6 py-4 text-right font-mono text-gray-700">
-                  {invoice.storageTiB.toFixed(3)} TiB
-                </td>
-                <td className="px-6 py-4 text-right text-gray-700">
-                  ${STORAGE_USD_PER_TIB.toFixed(2)}/TiB/month
-                </td>
-                <td className="px-6 py-4 text-right font-semibold text-gray-900">
-                  {formatPrice(invoice.storageAmount)}
-                </td>
-              </tr>
+          {/* Loading State */}
+          {isLoading && (
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <p>Loading data...</p>
+            </div>
+          )}
 
-              {/* Egress Line Item */}
-              <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 font-medium text-gray-800">Egress</td>
-                <td className="px-6 py-4 text-right font-mono text-gray-700">
-                  {invoice.egressTiB.toFixed(3)} TiB
-                </td>
-                <td className="px-6 py-4 text-right text-gray-700">
-                  ${EGRESS_USD_PER_TIB.toFixed(2)}/TiB
-                </td>
-                <td className="px-6 py-4 text-right font-semibold text-gray-900">
-                  {formatPrice(invoice.egressAmount)}
-                </td>
-              </tr>
+          {/* Error State */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+              <h2 className="text-xl font-semibold text-red-700 mb-2">Error</h2>
+              <p className="text-red-600">{error.message}</p>
+            </div>
+          )}
 
-              {/* Total */}
-              <tr className="bg-hot-blue-light">
-                <td colSpan={3} className="px-6 py-4 text-right font-bold text-gray-800">
-                  Total Amount Due
-                </td>
-                <td className="px-6 py-4 text-right font-bold text-hot-blue text-xl">
-                  {formatPrice(invoice.total)}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+          {/* Plan Data */}
+          {planData && (
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <h2 className="text-xl font-semibold mb-4">Plan (plan/get)</h2>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead>
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Field</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    <tr>
+                      <td className="px-6 py-4 whitespace-nowrap font-medium">Limit (bytes)</td>
+                      <td className="px-6 py-4 font-mono">{planData.limit.toLocaleString()}</td>
+                    </tr>
+                    <tr>
+                      <td className="px-6 py-4 whitespace-nowrap font-medium">Limit (TiB)</td>
+                      <td className="px-6 py-4 font-mono">{(planData.limit / (1024 ** 4)).toFixed(4)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
-        {/* Notes */}
-        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-gray-700">
-            <strong>Note:</strong> This invoice is for informational purposes. You will receive an official invoice via email for payment.
-          </p>
+          {/* Usage Data */}
+          {usageData && (
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <h2 className="text-xl font-semibold mb-4">Storage Usage (account/usage/get)</h2>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead>
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Field</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bytes</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">TiB</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">USD</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    <tr>
+                      <td className="px-6 py-4 whitespace-nowrap font-medium">Total Storage</td>
+                      <td className="px-6 py-4 font-mono">{usageData.total.toLocaleString()}</td>
+                      <td className="px-6 py-4 font-mono">{(usageData.total / (1024 ** 4)).toFixed(4)}</td>
+                      <td className="px-6 py-4 font-mono">${((usageData.total / (1024 ** 4)) * STORAGE_USD_PER_TIB).toFixed(2)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <h3 className="text-lg font-semibold mt-6 mb-4">Raw Response</h3>
+              <pre className="bg-gray-50 p-4 rounded overflow-x-auto text-xs">
+                {JSON.stringify(usageData.raw, null, 2)}
+              </pre>
+            </div>
+          )}
+
+          {/* Egress Data */}
+          {egressLoading && !egressData && (
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <h2 className="text-xl font-semibold mb-4">Egress (account/egress/get)</h2>
+              <p className="text-gray-600">Loading egress data...</p>
+            </div>
+          )}
+          {egressError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+              <h2 className="text-xl font-semibold text-red-700 mb-2">Egress Error</h2>
+              <p className="text-red-600">{egressError.message}</p>
+              {(egressError as any).ucanto && (
+                <pre className="text-xs mt-2 text-red-600 bg-red-100 p-2 rounded overflow-x-auto">
+                  {JSON.stringify((egressError as any).ucanto, null, 2)}
+                </pre>
+              )}
+            </div>
+          )}
+          {egressData && (
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <h2 className="text-xl font-semibold mb-4">Egress (account/egress/get)</h2>
+
+              {(egressData as any).total !== undefined && (
+                <div className="overflow-x-auto mb-6">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead>
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Field</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bytes</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">TiB</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">USD</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      <tr>
+                        <td className="px-6 py-4 whitespace-nowrap font-medium">Total Egress</td>
+                        <td className="px-6 py-4 font-mono">{((egressData as any).total || 0).toLocaleString()}</td>
+                        <td className="px-6 py-4 font-mono">{(((egressData as any).total || 0) / (1024 ** 4)).toFixed(4)}</td>
+                        <td className="px-6 py-4 font-mono">${((((egressData as any).total || 0) / (1024 ** 4)) * EGRESS_USD_PER_TIB).toFixed(2)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              <h3 className="text-lg font-semibold mt-6 mb-4">Raw Response</h3>
+              <pre className="bg-gray-50 p-4 rounded overflow-x-auto text-xs">
+                {JSON.stringify(egressData, null, 2)}
+              </pre>
+            </div>
+          )}
         </div>
       </div>
-    </DashboardLayout>
+    </Authenticator>
   )
 }

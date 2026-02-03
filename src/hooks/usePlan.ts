@@ -1,6 +1,5 @@
 import useSWR from 'swr'
 import { useW3 } from '@storacha/ui-react'
-import { invokeWithExpiryCheck } from '../components/Authenticator'
 
 interface UsePlanResult {
   data?: {
@@ -26,20 +25,18 @@ export function usePlan(accountDID?: string): UsePlanResult {
     async () => {
       if (!client || !account) return null
 
-      return await invokeWithExpiryCheck(async () => {
-        // Invoke plan/get capability
-        const result = await account.plan.get()
+      // Invoke plan/get capability
+      const result = await account.plan.get()
 
-        if (result.error) {
-          throw new Error(result.error.message ?? 'Failed to fetch plan')
-        }
+      if (result.error) {
+        throw new Error(result.error.message ?? 'Failed to fetch plan')
+      }
 
-        // The type definition may not include 'limit' but it exists in the actual response
-        const plan = result.ok as any
-        return {
-          limit: Number(plan?.limit) || 0,
-        }
-      })
+      // The type definition may not include 'limit' but it exists in the actual response
+      const plan = result.ok as any
+      return {
+        limit: plan?.limit ?? 0,
+      }
     },
     {
       revalidateOnFocus: false,

@@ -1,7 +1,6 @@
 import useSWR from 'swr'
 import { useW3 } from '@storacha/ui-react'
 import type { AccountEgress, Period } from '../types'
-import { invokeWithExpiryCheck } from '../components/Authenticator'
 import { etrackerConnection } from '../lib/services'
 import { invoke } from '@ucanto/client'
 
@@ -31,48 +30,69 @@ export function useAccountEgress(
     async () => {
       if (!client || !accountDID) return null
 
-      return await invokeWithExpiryCheck(async () => {
-        // Create account/egress/get invocation
-        // Note: This is a simplified version - actual implementation depends on
-        // how account/egress/get capability is defined in go-libstoracha
+      // Create account/egress/get invocation
+      const capability = period
+        ? {
+            can: 'account/egress/get' as const,
+            with: accountDID as `${string}:${string}`,
+            nb: {
+              period: {
+                from: period.from.toISOString(),
+                to: period.to.toISOString(),
+              },
+            },
+          }
+        : {
+            can: 'account/egress/get' as const,
+            with: accountDID as `${string}:${string}`,
+          }
 
-        // For now, we'll assume the capability exists and can be invoked
-        // The actual implementation may need to be adjusted based on the
-        // capability definition
-
-        const capability = {
-          can: 'account/egress/get' as const,
-          with: accountDID as `${string}:${string}`,
-          nb: period
-            ? {
-                period: {
-                  from: period.from.toISOString(),
-                  to: period.to.toISOString(),
-                },
-              }
-            : undefined,
-        } as const
-
-        const invocation = await invoke({
-          issuer: client.agent.issuer,
-          audience: etrackerConnection.id,
-          capability: capability as any, // Type assertion needed for custom capability
-          proofs: client.proofs(),
-        })
-
-        const result = await invocation.execute(etrackerConnection)
-
-        if (result.out.error) {
-          throw new Error(result.out.error.message ?? 'Failed to fetch egress data')
-        }
-
-        return result.out.ok as AccountEgress
+      const invocation = await invoke({
+        issuer: client.agent.issuer,
+        audience: etrackerConnection.id,
+        capability: capability as any, // Type assertion needed for custom capability
+        proofs: client.proofs(),
       })
+
+      const result = await invocation.execute(etrackerConnection)
+
+      // Log the full result structure to understand what we're getting
+      console.log('account/egress/get result:', {
+        hasOut: !!result.out,
+        hasOk: !!result.out?.ok,
+        hasError: !!result.out?.error,
+        fullResult: result,
+      })
+
+      // Check for errors in the receipt (UCAN errors are returned in the receipt, not as exceptions)
+      if (result.out.error) {
+        const errorMessage = result.out.error.message ?? 'Failed to fetch egress data'
+        const errorName = result.out.error.name ?? 'UnknownError'
+        console.error('account/egress/get error detected:', {
+          name: errorName,
+          message: errorMessage,
+          fullError: result.out.error,
+          accountDID,
+          period,
+        })
+        const error = new Error(`${errorName}: ${errorMessage}`)
+        // @ts-ignore - Add the full UCAN error for debugging
+        error.ucanto = result.out.error
+        throw error
+      }
+
+      console.log('account/egress/get success:', { ok: result.out.ok })
+      return result.out.ok as AccountEgress
     },
     {
       revalidateOnFocus: false,
-      refreshInterval: 60000, // Refresh every minute for monitoring
+      refreshInterval: 0, // Don't auto-refresh - user can manually refresh
       dedupingInterval: 30000, // Dedupe requests within 30 seconds
+      shouldRetryOnError: false, // Don't retry on errors
+      onErrorRetry: () => {
+        // Completely disable retries
+        return
+      },
     }
   )
 
