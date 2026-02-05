@@ -51,17 +51,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="min-h-screen bg-[#F0F7FF] flex">
-      {/* Sidebar */}
-      <aside className="w-60 bg-white border-r border-gray-100 flex flex-col fixed h-full">
+      {/* Sidebar - Blue theme */}
+      <aside className="w-60 bg-hot-blue flex flex-col fixed h-full rounded-tr-[32px]">
         {/* Logo */}
-        <div className="p-6 pb-4">
-          <Link href="/" className="flex items-center gap-2.5">
+        <div className="px-5 py-6">
+          <Link href="/" className="flex items-center">
             <Image
               src="/icons/logo.svg"
-              alt="Storacha"
-              width={32}
-              height={32}
-              className="w-8 h-8"
+              alt="Storacha Forge"
+              width={160}
+              height={40}
+              className="h-10 w-auto brightness-0 invert"
             />
           </Link>
         </div>
@@ -80,8 +80,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
                       transition-all duration-200
                       ${isActive
-                        ? 'bg-hot-blue text-white shadow-md shadow-hot-blue/25'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-hot-blue'
+                        ? 'bg-[#005DA3] text-white'
+                        : 'text-white/80 hover:bg-white/10 hover:text-white'
                       }
                     `}
                   >
@@ -90,7 +90,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       alt=""
                       width={20}
                       height={20}
-                      className={`w-5 h-5 ${isActive ? 'brightness-0 invert' : ''}`}
+                      className={`w-5 h-5 ${isActive ? '' : 'brightness-0 invert'}`}
                     />
                     {item.label}
                   </Link>
@@ -101,9 +101,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </nav>
 
         {/* Trusted by section */}
-        <div className="px-6 py-6 border-t border-gray-100">
-          <p className="text-xs text-gray-400 mb-4">Trusted by</p>
-          <div className="grid grid-cols-2 gap-3">
+        <div className="px-5 py-5">
+          <p className="text-[11px] text-white/50 uppercase tracking-wider mb-4">Trusted by</p>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-3">
             {partnerLogos.map((logo, index) => (
               <Image
                 key={index}
@@ -111,22 +111,22 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 alt={logo.alt}
                 width={80}
                 height={24}
-                className="h-6 w-auto object-contain opacity-60 hover:opacity-100 transition-opacity"
+                className="h-5 w-auto object-contain  opacity-60 hover:opacity-100 transition-opacity"
               />
             ))}
           </div>
         </div>
 
         {/* Footer links */}
-        <div className="px-6 py-4 border-t border-gray-100">
-          <div className="flex gap-4 text-xs text-gray-400">
-            <a href="https://docs.storacha.network/terms/" target="_blank" rel="noopener noreferrer" className="hover:text-hot-blue transition-colors">
+        <div className="px-5 py-4 border-t border-white/10">
+          <div className="flex gap-5 text-xs text-white/50">
+            <a href="https://docs.storacha.network/terms/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
               Terms
             </a>
-            <a href="https://docs.storacha.network/" target="_blank" rel="noopener noreferrer" className="hover:text-hot-blue transition-colors">
+            <a href="https://docs.storacha.network/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
               Docs
             </a>
-            <a href="https://storacha.network/support" target="_blank" rel="noopener noreferrer" className="hover:text-hot-blue transition-colors">
+            <a href="mailto:support@storacha.network" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
               Support
             </a>
           </div>
@@ -138,7 +138,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Top Header */}
         <header className="bg-white border-b border-gray-100 sticky top-0 z-10">
           <div className="flex items-center justify-between px-8 py-4">
-            {/* Search placeholder - can be implemented later */}
+            {/* Search placeholder */}
             <div className="flex-1 max-w-md">
               <div className="relative">
                 <input
