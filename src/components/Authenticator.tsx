@@ -75,19 +75,18 @@ export function AuthenticationSubmitted(): JSX.Element {
         <div className="text-hot-blue bg-white border border-hot-blue rounded-2xl shadow-md px-10 pt-8 pb-8">
           <div className="flex flex-row gap-4 mb-8 justify-center">
             <h1 className="text-3xl font-bold text-hot-blue font-sans">
-              Check Your Email
+              Storacha Customer Dashboard
             </h1>
           </div>
-          <h2 className="text-xl font-sans mb-4">Verify your email address</h2>
-          <p className="pt-2 pb-4 text-gray-700">
+          <h2 className="text-xl font-sans font-semibold text-hot-blue mb-4">
+            Verify your email address!
+          </h2>
+          <p className="text-gray-700 mb-6">
             Click the link in the email we sent to{' '}
-            <span className="font-semibold tracking-wide font-mono text-hot-blue">
+            <span className="font-semibold text-gray-900">
               {email}
             </span>{' '}
-            to authorize this agent.
-            <br />
-            <br />
-            Don&apos;t forget to check your spam folder!
+            to authorize this agent. Don&apos;t forget to check your spam folder!
           </p>
           <AuthCore.CancelButton className="inline-block bg-hot-blue border border-hot-blue hover:bg-hot-blue-dark font-sans text-white uppercase text-sm px-8 py-3 rounded-full whitespace-nowrap transition-colors">
             Cancel
@@ -106,10 +105,15 @@ export function AuthenticationEnsurer({
 }: {
   children: ReactNode
 }): JSX.Element {
-  const [{ accounts }] = useAuthenticator()
+  const [{ accounts, submitted }] = useAuthenticator()
 
   // Check if user is authenticated
   const isAuthenticated = accounts.length > 0
+
+  // Show verification screen if form was submitted but not yet authenticated
+  if (submitted && !isAuthenticated) {
+    return <AuthenticationSubmitted />
+  }
 
   if (!isAuthenticated) {
     return <AuthenticationForm />
