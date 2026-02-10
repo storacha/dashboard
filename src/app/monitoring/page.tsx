@@ -105,7 +105,7 @@ export default function MonitoringPage() {
               <span className="text-sm text-gray-500 font-medium">Usage</span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {reserved > 0 ? ((used / reserved) * 100).toFixed(3) : '—'}<span className="text-base font-medium text-gray-400">%</span>
+              {reserved > 0 ? ((used / reserved) * 100).toFixed(2) : '—'}<span className="text-base font-medium text-gray-400">%</span>
             </div>
             {/* Mini progress bar */}
             <div className="mt-3 w-full bg-gray-100 rounded-full h-2 overflow-hidden">
