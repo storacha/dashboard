@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useMemo } from 'react'
 import { useW3 } from '@storacha/ui-react'
 import DashboardLayout from '../components/DashboardLayout'
 import { useAccountUsage } from '../hooks/useAccountUsage'
@@ -7,19 +8,113 @@ import { useAccountEgress } from '../hooks/useAccountEgress'
 import { getLastMonthPeriod, formatDate, bytesToTiB } from '../lib/formatting'
 import { STORAGE_USD_PER_TIB, EGRESS_USD_PER_TIB } from '../lib/services'
 import { calculateTotalInvoice, formatPrice } from '../lib/pricing'
+import type { Period } from '../types'
+
+/**
+ * Format date to YYYY-MM-DD for input[type="date"]
+ */
+function toInputDateString(date: Date): string {
+  return date.toISOString().split('T')[0]
+}
+
+/**
+ * Get start of day (midnight) for a date
+ */
+function startOfDay(date: Date): Date {
+  const d = new Date(date)
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+/**
+ * Get end of day (23:59:59.999) for a date
+ */
+function endOfDay(date: Date): Date {
+  const d = new Date(date)
+  d.setHours(23, 59, 59, 999)
+  return d
+}
 
 export default function InvoicingPage() {
   const [{ accounts }] = useW3()
   const account = accounts[0]
   const accountDID = account?.did()
 
-  const period = getLastMonthPeriod()
+  // Default period: last month
+  const defaultPeriod = getLastMonthPeriod()
 
+  // Date picker state - use start of day to avoid precision issues
+  const [fromDate, setFromDate] = useState<Date>(startOfDay(defaultPeriod.from))
+  const [toDate, setToDate] = useState<Date>(startOfDay(defaultPeriod.to))
+
+  const period: Period = useMemo(() => ({
+    from: startOfDay(fromDate),
+    to: startOfDay(toDate),  // Use start of day to avoid exceeding delegation constraint
+  }), [fromDate, toDate])
+
+  // Fetch data
   const { data: usageData, isLoading: usageLoading, error: usageError } = useAccountUsage(accountDID)
   const { data: egressData, isLoading: egressLoading, error: egressError } = useAccountEgress(accountDID, period)
 
+  // Filter usage data by selected period (client-side)
+  const filteredStorageBytes = useMemo(() => {
+    if (!usageData?.daily || usageData.daily.length === 0) {
+      return usageData?.total ?? 0
+    }
+
+    // Filter daily snapshots to selected period
+    const filteredSnapshots = usageData.daily.filter(snapshot => {
+      const snapshotDate = new Date(snapshot.date)
+      return snapshotDate >= fromDate && snapshotDate <= toDate
+    })
+
+    if (filteredSnapshots.length === 0) {
+      // No data in selected period, return 0
+      return 0
+    }
+
+    // Use the last snapshot's value in the period (storage at end of period)
+    return filteredSnapshots[filteredSnapshots.length - 1].bytes
+  }, [usageData, fromDate, toDate])
+
   const isLoading = usageLoading || egressLoading
   const error = usageError || egressError
+
+  // Handle date changes
+  const handleFromDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = new Date(e.target.value)
+    if (!isNaN(newDate.getTime())) {
+      setFromDate(startOfDay(newDate))
+    }
+  }
+
+  const handleToDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = new Date(e.target.value)
+    if (!isNaN(newDate.getTime())) {
+      setToDate(startOfDay(newDate))
+    }
+  }
+
+  // Quick period selection
+  const setThisMonth = () => {
+    const now = new Date()
+    setFromDate(startOfDay(new Date(now.getFullYear(), now.getMonth(), 1)))
+    setToDate(startOfDay(now))
+  }
+
+  const setLastMonth = () => {
+    const period = getLastMonthPeriod()
+    setFromDate(startOfDay(period.from))
+    setToDate(startOfDay(period.to))
+  }
+
+  const setLast30Days = () => {
+    const now = new Date()
+    const thirtyDaysAgo = new Date(now)
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+    setFromDate(startOfDay(thirtyDaysAgo))
+    setToDate(startOfDay(now))
+  }
 
   if (isLoading) {
     return (
@@ -45,7 +140,7 @@ export default function InvoicingPage() {
     )
   }
 
-  const storageBytes = usageData?.total ?? 0
+  const storageBytes = filteredStorageBytes
   const egressBytes = egressData?.total ?? 0
   const invoice = calculateTotalInvoice(storageBytes, egressBytes)
 
@@ -120,18 +215,73 @@ export default function InvoicingPage() {
           </div>
         </div>
 
-        {/* Billing Period */}
+        {/* Billing Period with Date Picker */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Billing Period</h3>
-              <p className="text-lg font-semibold text-gray-900">
+              <h3 className="text-sm font-medium text-gray-500 mb-3">Billing Period</h3>
+              <div className="flex flex-wrap items-center gap-3">
+                {/* From Date */}
+                <div className="flex items-center gap-2">
+                  <label htmlFor="fromDate" className="text-sm text-gray-600">From:</label>
+                  <input
+                    type="date"
+                    id="fromDate"
+                    value={toInputDateString(fromDate)}
+                    onChange={handleFromDateChange}
+                    max={toInputDateString(toDate)}
+                    className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-hot-blue/20 focus:border-hot-blue"
+                  />
+                </div>
+
+                <span className="text-gray-400">—</span>
+
+                {/* To Date */}
+                <div className="flex items-center gap-2">
+                  <label htmlFor="toDate" className="text-sm text-gray-600">To:</label>
+                  <input
+                    type="date"
+                    id="toDate"
+                    value={toInputDateString(toDate)}
+                    onChange={handleToDateChange}
+                    min={toInputDateString(fromDate)}
+                    max={toInputDateString(new Date())}
+                    className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-hot-blue/20 focus:border-hot-blue"
+                  />
+                </div>
+              </div>
+
+              {/* Quick selection buttons */}
+              <div className="flex flex-wrap gap-2 mt-3">
+                <button
+                  onClick={setLastMonth}
+                  className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  Last Month
+                </button>
+                <button
+                  onClick={setThisMonth}
+                  className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  This Month
+                </button>
+                <button
+                  onClick={setLast30Days}
+                  className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  Last 30 Days
+                </button>
+              </div>
+            </div>
+
+            <div className="text-right">
+              <p className="text-lg font-semibold text-gray-900 mb-2">
                 {formatDate(period.from)} — {formatDate(period.to)}
               </p>
+              <button className="px-5 py-2.5 bg-hot-blue text-white text-sm font-medium rounded-xl hover:bg-hot-blue-dark transition-colors shadow-sm">
+                Check Billing
+              </button>
             </div>
-            <button className="px-5 py-2.5 bg-hot-blue text-white text-sm font-medium rounded-xl hover:bg-hot-blue-dark transition-colors shadow-sm">
-              Check Billing
-            </button>
           </div>
         </div>
 
