@@ -56,14 +56,14 @@ export default function CapacityBar({ reserved, used }: CapacityBarProps) {
           >
             {percentUsed >= 15 && (
               <span className="text-white text-xs font-medium">
-                {percentUsed.toFixed(1)}%
+                {percentUsed.toFixed(3)}%
               </span>
             )}
           </div>
         </div>
 
         {percentUsed < 15 && percentUsed > 0 && (
-          <p className="text-xs text-gray-500 mt-1">{percentUsed.toFixed(1)}% used</p>
+          <p className="text-xs text-gray-500 mt-1">{percentUsed.toFixed(3)}% used</p>
         )}
       </div>
 

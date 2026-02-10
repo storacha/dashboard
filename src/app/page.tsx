@@ -5,7 +5,7 @@ import { useW3 } from '@storacha/ui-react'
 import DashboardLayout from '../components/DashboardLayout'
 import { useAccountUsage } from '../hooks/useAccountUsage'
 import { useAccountEgress } from '../hooks/useAccountEgress'
-import { getLastMonthPeriod, formatDate, bytesToTiB } from '../lib/formatting'
+import { getLastMonthPeriod, formatDate, formatBytesAuto } from '../lib/formatting'
 import { STORAGE_USD_PER_TIB, EGRESS_USD_PER_TIB } from '../lib/services'
 import { calculateTotalInvoice, formatPrice } from '../lib/pricing'
 import type { Period } from '../types'
@@ -144,6 +144,10 @@ export default function InvoicingPage() {
   const egressBytes = egressData?.total ?? 0
   const invoice = calculateTotalInvoice(storageBytes, egressBytes)
 
+  // Auto-format storage and egress for display
+  const storageDisplay = formatBytesAuto(storageBytes)
+  const egressDisplay = formatBytesAuto(egressBytes)
+
   return (
     <DashboardLayout>
       <div className="max-w-5xl">
@@ -163,7 +167,7 @@ export default function InvoicingPage() {
               <span className="text-sm text-gray-500 font-medium">Storage Used</span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {invoice.storageTiB.toFixed(2)} <span className="text-base font-medium text-gray-400">TiB</span>
+              {storageDisplay.value.toFixed(2)} <span className="text-base font-medium text-gray-400">{storageDisplay.unit}</span>
             </div>
           </div>
 
@@ -178,7 +182,7 @@ export default function InvoicingPage() {
               <span className="text-sm text-gray-500 font-medium">Egress Used</span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {invoice.egressTiB.toFixed(2)} <span className="text-base font-medium text-gray-400">TiB</span>
+              {egressDisplay.value.toFixed(2)} <span className="text-base font-medium text-gray-400">{egressDisplay.unit}</span>
             </div>
           </div>
 
@@ -315,7 +319,7 @@ export default function InvoicingPage() {
                     </div>
                   </td>
                   <td className="px-6 py-5 text-right font-mono text-sm text-gray-700">
-                    {invoice.storageTiB.toFixed(3)} TiB
+                    {storageDisplay.value.toFixed(3)} {storageDisplay.unit}
                   </td>
                   <td className="px-6 py-5 text-right text-sm text-gray-500">
                     ${STORAGE_USD_PER_TIB.toFixed(2)}/TiB/month
@@ -338,7 +342,7 @@ export default function InvoicingPage() {
                     </div>
                   </td>
                   <td className="px-6 py-5 text-right font-mono text-sm text-gray-700">
-                    {invoice.egressTiB.toFixed(3)} TiB
+                    {egressDisplay.value.toFixed(3)} {egressDisplay.unit}
                   </td>
                   <td className="px-6 py-5 text-right text-sm text-gray-500">
                     ${EGRESS_USD_PER_TIB.toFixed(2)}/TiB

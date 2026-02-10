@@ -28,6 +28,25 @@ export function formatBytes(bytes: number): string {
 }
 
 /**
+ * Format bytes to the most appropriate unit, returning value and unit separately.
+ * Uses 1.0 as the threshold — displayed value is always >= 1.0.
+ */
+export function formatBytesAuto(bytes: number, decimals = 2): { value: number; unit: string; formatted: string } {
+  if (bytes === 0) return { value: 0, unit: 'GiB', formatted: '0.00 GiB' }
+
+  const k = 1024
+  const sizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  const value = bytes / Math.pow(k, i)
+
+  return {
+    value,
+    unit: sizes[i],
+    formatted: `${value.toFixed(decimals)} ${sizes[i]}`,
+  }
+}
+
+/**
  * Format date in a standard format
  */
 export function formatDate(date: Date | string): string {

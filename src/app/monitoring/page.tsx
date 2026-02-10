@@ -6,7 +6,7 @@ import CapacityBar from '../../components/CapacityBar'
 import { useAccountUsage } from '../../hooks/useAccountUsage'
 import { useAccountEgress } from '../../hooks/useAccountEgress'
 import { usePlan } from '../../hooks/usePlan'
-import { getLastMonthPeriod, formatBytes, bytesToTiB } from '../../lib/formatting'
+import { getLastMonthPeriod, formatBytes, formatBytesAuto } from '../../lib/formatting'
 
 export default function MonitoringPage() {
   const [{ accounts }] = useW3()
@@ -43,6 +43,11 @@ export default function MonitoringPage() {
     0
   )
 
+  // Auto-format for display
+  const usageDisplay = formatBytesAuto(used)
+  const capacityDisplay = formatBytesAuto(reserved)
+  const egressDisplay = formatBytesAuto(egressTotal)
+
   return (
     <DashboardLayout>
       <div className="max-w-6xl">
@@ -62,7 +67,7 @@ export default function MonitoringPage() {
               <span className="text-sm text-gray-500 font-medium">Total Data Usage</span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {bytesToTiB(used).toFixed(1)} <span className="text-base font-medium text-gray-400">TiB</span>
+              {usageDisplay.value.toFixed(1)} <span className="text-base font-medium text-gray-400">{usageDisplay.unit}</span>
             </div>
             <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -83,7 +88,7 @@ export default function MonitoringPage() {
               <span className="text-sm text-gray-500 font-medium">Capacity</span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {reserved === 0 ? '∞' : bytesToTiB(reserved).toFixed(1)} <span className="text-base font-medium text-gray-400">TiB</span>
+              {reserved === 0 ? '∞' : `${capacityDisplay.value.toFixed(1)}`} <span className="text-base font-medium text-gray-400">{reserved === 0 ? '' : capacityDisplay.unit}</span>
             </div>
             <p className="text-xs text-gray-400 mt-2">Total Available</p>
           </div>
@@ -100,7 +105,7 @@ export default function MonitoringPage() {
               <span className="text-sm text-gray-500 font-medium">Usage</span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {reserved > 0 ? ((used / reserved) * 100).toFixed(1) : '—'}<span className="text-base font-medium text-gray-400">%</span>
+              {reserved > 0 ? ((used / reserved) * 100).toFixed(3) : '—'}<span className="text-base font-medium text-gray-400">%</span>
             </div>
             {/* Mini progress bar */}
             <div className="mt-3 w-full bg-gray-100 rounded-full h-2 overflow-hidden">
@@ -122,7 +127,7 @@ export default function MonitoringPage() {
               <span className="text-sm text-gray-500 font-medium">Egress</span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {bytesToTiB(egressTotal).toFixed(2)} <span className="text-base font-medium text-gray-400">TiB</span>
+              {egressDisplay.value.toFixed(2)} <span className="text-base font-medium text-gray-400">{egressDisplay.unit}</span>
             </div>
             <p className="text-xs text-gray-400 mt-2">This month</p>
           </div>
