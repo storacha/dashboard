@@ -129,7 +129,6 @@ export default function MonitoringPage() {
             <div className="text-2xl font-bold text-gray-900">
               {egressDisplay.value.toFixed(2)} <span className="text-base font-medium text-gray-400">{egressDisplay.unit}</span>
             </div>
-            <p className="text-xs text-gray-400 mt-2">This month</p>
           </div>
         </div>
 
