@@ -38,8 +38,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const displayEmail = accountDID ? parseEmailFromDID(accountDID) : ''
 
   const navItems = [
-    { href: '/', label: 'Invoicing', icon: '/icons/invoicing.svg' },
     { href: '/monitoring', label: 'Monitoring', icon: '/icons/monitoring.svg' },
+    { href: '/invoicing', label: 'Invoicing', icon: '/icons/invoicing.svg' },
   ]
 
   const partnerLogos = [

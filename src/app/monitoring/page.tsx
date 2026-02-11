@@ -129,7 +129,6 @@ export default function MonitoringPage() {
             <div className="text-2xl font-bold text-gray-900">
               {egressDisplay.value.toFixed(2)} <span className="text-base font-medium text-gray-400">{egressDisplay.unit}</span>
             </div>
-            <p className="text-xs text-gray-400 mt-2">This month</p>
           </div>
         </div>
 
@@ -201,30 +200,7 @@ export default function MonitoringPage() {
           </div>
         </div>
 
-        {/* Data Summary */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h3 className="font-semibold text-gray-900">Data Summary</h3>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center p-4 bg-gray-50 rounded-xl">
-                <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Total Storage</p>
-                <p className="text-lg font-bold text-gray-900 font-mono">{formatBytes(used)}</p>
-              </div>
-              <div className="text-center p-4 bg-gray-50 rounded-xl">
-                <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Total Egress</p>
-                <p className="text-lg font-bold text-gray-900 font-mono">{formatBytes(egressTotal)}</p>
-              </div>
-              <div className="text-center p-4 bg-gray-50 rounded-xl">
-                <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Reserved Capacity</p>
-                <p className="text-lg font-bold text-gray-900 font-mono">
-                  {reserved === 0 ? 'Unlimited' : formatBytes(reserved)}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+
       </div>
     </DashboardLayout>
   )
