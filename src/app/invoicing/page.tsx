@@ -75,17 +75,23 @@ export default function InvoicingPage() {
         updateURL(fromStr, toStr)
     }, [fromStr, toStr, updateURL])
 
-    // Build period for egress API call
-    // `from` = start of the from-day, `to` = current time (for recent data) or end of to-day
-    const period: Period = useMemo(() => {
+    // Check if date range is valid before doing anything
+    const isValidPeriod = fromStr < toStr
+
+    // Build period for egress API call — both midnight UTC, no delegation overflow
+    const period: Period | null = useMemo(() => {
+        if (!isValidPeriod) return null
         const from = new Date(fromStr + 'T00:00:00Z')
         const to = new Date(toStr + 'T00:00:00Z')
         return { from, to }
-    }, [fromStr, toStr])
+    }, [fromStr, toStr, isValidPeriod])
 
-    // Fetch data
+    // Fetch data — egress only fires when period is valid
     const { data: usageData, isLoading: usageLoading, error: usageError } = useAccountUsage(accountDID)
-    const { data: egressData, isLoading: egressLoading, error: egressError } = useAccountEgress(accountDID, period)
+    const { data: egressData, isLoading: egressLoading, error: egressError } = useAccountEgress(
+        accountDID,
+        period ?? undefined
+    )
 
     // Filter storage: find the last snapshot on or before toDate
     // This = "how much storage exists at end of selected period"
@@ -123,8 +129,8 @@ export default function InvoicingPage() {
         return 0
     }, [usageData, fromStr, toStr])
 
-    const isLoading = usageLoading || egressLoading
-    const error = usageError || egressError
+    const isLoading = usageLoading || (isValidPeriod && egressLoading)
+    const error = usageError || (isValidPeriod ? egressError : null)
 
     // Date change handlers — work with strings directly
     const handleFromDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -166,8 +172,8 @@ export default function InvoicingPage() {
         )
     }
 
-    const storageBytes = filteredStorageBytes
-    const egressBytes = egressData?.total ?? 0
+    const storageBytes = isValidPeriod ? filteredStorageBytes : 0
+    const egressBytes = isValidPeriod ? (egressData?.total ?? 0) : 0
     const invoice = calculateTotalInvoice(storageBytes, egressBytes)
 
     const storageDisplay = formatBytesAuto(storageBytes)
@@ -258,7 +264,7 @@ export default function InvoicingPage() {
                                         id="fromDate"
                                         value={fromStr}
                                         onChange={handleFromDateChange}
-                                        max={toStr}
+                                        max={todayStr}
                                         className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-hot-blue/20 focus:border-hot-blue"
                                     />
                                 </div>
@@ -272,7 +278,6 @@ export default function InvoicingPage() {
                                         id="toDate"
                                         value={toStr}
                                         onChange={handleToDateChange}
-                                        min={fromStr}
                                         max={todayStr}
                                         className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-hot-blue/20 focus:border-hot-blue"
                                     />
@@ -304,7 +309,7 @@ export default function InvoicingPage() {
 
                         <div className="text-right">
                             <p className="text-lg font-semibold text-gray-900 mb-2">
-                                {formatDate(period.from)} — {formatDate(period.to)}
+                                {formatDate(fromStr)} — {formatDate(toStr)}
                             </p>
                             <button className="px-5 py-2.5 bg-hot-blue text-white text-sm font-medium rounded-xl hover:bg-hot-blue-dark transition-colors shadow-sm">
                                 Check Billing
@@ -312,6 +317,18 @@ export default function InvoicingPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Invalid period message */}
+                {!isValidPeriod && (
+                    <div className="bg-hot-yellow-light border border-hot-yellow rounded-2xl p-5 mb-6">
+                        <div className="flex gap-3 items-center">
+                            <span className="text-2xl">📅</span>
+                            <p className="text-sm text-gray-700">
+                                <span className="font-semibold">Heads up!</span> Your &quot;From&quot; date is on or after your &quot;To&quot; date. Pick a &quot;From&quot; that comes before &quot;To&quot; and we&apos;ll crunch the numbers.
+                            </p>
+                        </div>
+                    </div>
+                )}
 
                 {/* Invoice Table */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
