@@ -6,14 +6,20 @@ import CapacityBar from '../../components/CapacityBar'
 import { useAccountUsage } from '../../hooks/useAccountUsage'
 import { useAccountEgress } from '../../hooks/useAccountEgress'
 import { usePlan } from '../../hooks/usePlan'
-import { getLastMonthPeriod, formatBytes, formatBytesAuto } from '../../lib/formatting'
+import { formatBytesAuto } from '../../lib/formatting'
+import { Period } from '@/types'
+import { useMemo } from 'react'
 
 export default function MonitoringPage() {
   const [{ accounts }] = useW3()
   const account = accounts[0]
   const accountDID = account?.did()
 
-  const period = getLastMonthPeriod()
+  const period: Period = useMemo(() => {
+    const now = new Date()
+    const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())
+    return { from: oneYearAgo, to: now }
+  }, [])
 
   const { data: planData, isLoading: planLoading } = usePlan(accountDID)
   const { data: usageData, isLoading: usageLoading } = useAccountUsage(accountDID)
@@ -129,6 +135,7 @@ export default function MonitoringPage() {
             <div className="text-2xl font-bold text-gray-900">
               {egressDisplay.value.toFixed(2)} <span className="text-base font-medium text-gray-400">{egressDisplay.unit}</span>
             </div>
+            <p className="text-xs text-gray-400 mt-2">Past 12 months</p>
           </div>
         </div>
 
