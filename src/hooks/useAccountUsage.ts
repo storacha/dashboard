@@ -43,7 +43,7 @@ export function useAccountUsage(accountDID?: string): UseAccountUsageResult {
     },
     {
       revalidateOnFocus: false,
-      refreshInterval: 300000, // Refresh every 5 minutes
+      refreshInterval: 0, // No automatic refresh
       dedupingInterval: 60000, // Dedupe requests within 1 minute
     }
   )
