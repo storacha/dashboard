@@ -62,7 +62,7 @@ export default function DashboardPage() {
 
         {/* Metrics Cards Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-          {/* Total Data Usage Card */}
+          {/* Storage Utilization Card */}
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-9 h-9 rounded-xl bg-hot-blue-light flex items-center justify-center">
@@ -70,7 +70,7 @@ export default function DashboardPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
-              <span className="text-sm text-gray-500 font-medium">Total Data Usage</span>
+              <span className="text-sm text-gray-500 font-medium">Storage Utilization</span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
               {usageDisplay.value.toFixed(1)} <span className="text-base font-medium text-gray-400">{usageDisplay.unit}</span>
@@ -83,7 +83,7 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          {/* Capacity Card */}
+          {/* Reserved Storage Capacity Card */}
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-9 h-9 rounded-xl bg-hot-blue-light flex items-center justify-center">
@@ -91,7 +91,7 @@ export default function DashboardPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                 </svg>
               </div>
-              <span className="text-sm text-gray-500 font-medium">Capacity</span>
+              <span className="text-sm text-gray-500 font-medium">Reserved Storage Capacity</span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
               {reserved === 0 ? '∞' : `${capacityDisplay.value.toFixed(1)}`} <span className="text-base font-medium text-gray-400">{reserved === 0 ? '' : capacityDisplay.unit}</span>
@@ -99,7 +99,7 @@ export default function DashboardPage() {
             <p className="text-xs text-gray-400 mt-2">Total Available</p>
           </div>
 
-          {/* Usage Percentage Card */}
+          {/* Storage Utilization Card */}
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-9 h-9 rounded-xl bg-hot-yellow-light flex items-center justify-center">
@@ -108,7 +108,7 @@ export default function DashboardPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
                 </svg>
               </div>
-              <span className="text-sm text-gray-500 font-medium">Usage</span>
+              <span className="text-sm text-gray-500 font-medium">Storage Utilization</span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
               {reserved > 0 ? ((used / reserved) * 100).toFixed(2) : '—'}<span className="text-base font-medium text-gray-400">%</span>
