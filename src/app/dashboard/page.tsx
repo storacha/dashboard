@@ -10,7 +10,7 @@ import { formatBytesAuto } from '../../lib/formatting'
 import { Period } from '@/types'
 import { useMemo } from 'react'
 
-export default function MonitoringPage() {
+export default function DashboardPage() {
   const [{ accounts }] = useW3()
   const account = accounts[0]
   const accountDID = account?.did()
@@ -33,7 +33,7 @@ export default function MonitoringPage() {
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-hot-blue/20 border-t-hot-blue rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-500 text-sm">Loading monitoring data...</p>
+            <p className="text-gray-500 text-sm">Loading dashboard data...</p>
           </div>
         </div>
       </DashboardLayout>
@@ -58,7 +58,7 @@ export default function MonitoringPage() {
     <DashboardLayout>
       <div className="max-w-6xl">
         {/* Page Title */}
-        <h1 className="text-2xl font-bold text-hot-blue mb-8">Monitoring</h1>
+        <h1 className="text-2xl font-bold text-hot-blue mb-8">Dashboard</h1>
 
         {/* Metrics Cards Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">

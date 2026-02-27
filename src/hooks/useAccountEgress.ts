@@ -71,7 +71,7 @@ export function useAccountEgress(
     },
     {
       revalidateOnFocus: false,
-      refreshInterval: 60000, // Refresh every minute for monitoring
+      refreshInterval: 60000, // Refresh the dashboard view every minute
       dedupingInterval: 30000, // Dedupe requests within 30 seconds
     }
   )
