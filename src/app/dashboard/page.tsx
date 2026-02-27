@@ -2,7 +2,6 @@
 
 import { useW3 } from '@storacha/ui-react'
 import DashboardLayout from '../../components/DashboardLayout'
-import CapacityBar from '../../components/CapacityBar'
 import { useAccountUsage } from '../../hooks/useAccountUsage'
 import { useAccountEgress } from '../../hooks/useAccountEgress'
 import { usePlan } from '../../hooks/usePlan'
@@ -138,75 +137,6 @@ export default function DashboardPage() {
             <p className="text-xs text-gray-400 mt-2">Past 12 months</p>
           </div>
         </div>
-
-        {/* Capacity Bar */}
-        <div className="mb-8">
-          <CapacityBar reserved={reserved} used={used} />
-        </div>
-
-        {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Storage Chart Placeholder */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="font-semibold text-gray-900">Daily Storage</h3>
-              <div className="flex items-center gap-4 text-xs">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded bg-hot-blue"></span>
-                  Storage
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-0.5 bg-hot-yellow"></span>
-                  Cumulative
-                </span>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="h-56 flex items-center justify-center bg-gradient-to-b from-gray-50 to-white rounded-xl border border-dashed border-gray-200">
-                <div className="text-center">
-                  <div className="w-12 h-12 rounded-full bg-hot-blue-light flex items-center justify-center mx-auto mb-3">
-                    <svg className="w-6 h-6 text-hot-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  </div>
-                  <p className="text-sm font-medium text-gray-600">{storageDataPoints} data points</p>
-                  <p className="text-xs text-gray-400 mt-1">Chart visualization coming soon</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Egress Chart Placeholder */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="font-semibold text-gray-900">Daily Egress</h3>
-              <div className="flex items-center gap-4 text-xs">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded bg-hot-blue"></span>
-                  Egress
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-0.5 bg-hot-yellow"></span>
-                  Cumulative
-                </span>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="h-56 flex items-center justify-center bg-gradient-to-b from-gray-50 to-white rounded-xl border border-dashed border-gray-200">
-                <div className="text-center">
-                  <div className="w-12 h-12 rounded-full bg-hot-blue-light flex items-center justify-center mx-auto mb-3">
-                    <svg className="w-6 h-6 text-hot-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                  </div>
-                  <p className="text-sm font-medium text-gray-600">{egressDataPoints} data points</p>
-                  <p className="text-xs text-gray-400 mt-1">Chart visualization coming soon</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
 
       </div>
     </DashboardLayout>
