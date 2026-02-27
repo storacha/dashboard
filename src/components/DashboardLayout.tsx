@@ -39,7 +39,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const navItems = [
     { href: '/monitoring', label: 'Monitoring', icon: '/icons/monitoring.svg' },
-    { href: '/invoicing', label: 'Invoicing', icon: '/icons/invoicing.svg' },
+    { href: '/billing', label: 'Billing', icon: '/icons/billing.svg' },
   ]
 
   const partnerLogos = [

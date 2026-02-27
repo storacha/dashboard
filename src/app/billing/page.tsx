@@ -47,7 +47,7 @@ function getThisMonthPeriod() {
     return { from: firstOfThisMonth, to: now }
 }
 
-export default function InvoicingPage() {
+export default function BillingPage() {
     const [{ accounts }] = useW3()
     const account = accounts[0]
     const accountDID = account?.did()
@@ -68,7 +68,7 @@ export default function InvoicingPage() {
         const params = new URLSearchParams()
         params.set('from', from)
         params.set('to', to)
-        router.replace(`/invoicing?${params.toString()}`, { scroll: false })
+        router.replace(`/billing?${params.toString()}`, { scroll: false })
     }, [router])
 
     useEffect(() => {
@@ -184,7 +184,7 @@ export default function InvoicingPage() {
     return (
         <DashboardLayout>
             <div className="max-w-5xl">
-                <h1 className="text-2xl font-bold text-hot-blue mb-8">Invoicing</h1>
+                <h1 className="text-2xl font-bold text-hot-blue mb-8">Billing</h1>
 
                 {/* Metrics Cards Row */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
