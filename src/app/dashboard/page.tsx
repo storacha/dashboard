@@ -98,7 +98,7 @@ export default function DashboardPage() {
             <p className="text-xs text-gray-400 mt-2">Total Available</p>
           </div>
 
-          {/* Storage Utilization Card */}
+          {/* Storage Capacity Remaining Card */}
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-9 h-9 rounded-xl bg-hot-yellow-light flex items-center justify-center">
@@ -107,16 +107,16 @@ export default function DashboardPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
                 </svg>
               </div>
-              <span className="text-sm text-gray-500 font-medium">Storage Utilization</span>
+              <span className="text-sm text-gray-500 font-medium">Storage Capacity Remaining</span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {reserved > 0 ? ((used / reserved) * 100).toFixed(2) : '—'}<span className="text-base font-medium text-gray-400">%</span>
+              {reserved > 0 ? ((1 - (used / reserved)) * 100).toFixed(2) : '—'}<span className="text-base font-medium text-gray-400">%</span>
             </div>
             {/* Mini progress bar */}
             <div className="mt-3 w-full bg-gray-100 rounded-full h-2 overflow-hidden">
               <div
                 className="h-full bg-hot-blue rounded-full transition-all duration-500"
-                style={{ width: `${reserved > 0 ? Math.min((used / reserved) * 100, 100) : 0}%` }}
+                style={{ width: `${reserved > 0 ? Math.min((1 - (used / reserved)) * 100, 100) : 0}%` }}
               />
             </div>
           </div>
