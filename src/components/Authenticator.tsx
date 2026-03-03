@@ -144,9 +144,19 @@ export default function Authenticator({
 /**
  * Check if an error indicates an expired delegation
  */
-export function isExpiredDelegationError(_error: any): boolean {
-  // Temporarily disabled to surface underlying errors
-  return false
+export function isExpiredDelegationError(error: any): boolean {
+  if (!error) return false
+
+  const message = error?.message?.toLowerCase() ?? ''
+  const name = error?.name?.toLowerCase() ?? ''
+
+  return (
+    message.includes('expired') ||
+    message.includes('not valid') ||
+    message.includes('invalid') ||
+    name === 'expirederror' ||
+    name === 'unauthorizederror'
+  )
 }
 
 /**
