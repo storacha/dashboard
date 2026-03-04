@@ -43,7 +43,7 @@ export function usePlan(accountDID?: string): UsePlanResult {
     },
     {
       revalidateOnFocus: false,
-      refreshInterval: 600000, // Refresh every 10 minutes
+      refreshInterval: 0, // No automatic refresh
       dedupingInterval: 120000, // Dedupe requests within 2 minutes
     }
   )

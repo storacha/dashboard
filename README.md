@@ -1,6 +1,6 @@
 # Customer Dashboard
 
-A client-side web application for Storacha customers to view their storage usage, egress statistics, and monthly invoicing.
+A client-side web application for Storacha customers to view their storage usage, egress statistics, and monthly billing.
 
 ## Architecture
 
@@ -12,19 +12,19 @@ A client-side web application for Storacha customers to view their storage usage
 
 ## Features
 
-### Invoicing View
-
-- Monthly storage usage in TiB with pricing calculations
-- Monthly egress usage in TiB with pricing calculations
-- Configurable pricing (set at build time)
-- Current calendar month billing period
-
-### Monitoring View
+### Dashboard View
 
 - **Capacity Bar**: Visual representation of reserved vs. used storage
 - **Daily Storage Chart**: Line chart for accumulated storage, bars for daily deltas
 - **Daily Egress Chart**: Bars for daily egress, line for accumulated total
 - Default period: First day of last complete month to today
+
+### Billing View
+
+- Monthly storage usage in TiB with pricing calculations
+- Monthly egress usage in TiB with pricing calculations
+- Configurable pricing (set at build time)
+- Current calendar month billing period
 
 ## Data Sources
 
@@ -101,8 +101,9 @@ web/customer/
 ├── src/
 │   ├── app/              # Next.js App Router pages
 │   │   ├── layout.tsx    # Root layout with providers
-│   │   ├── page.tsx      # Invoicing view
-│   │   └── monitoring/   # Monitoring view
+│   │   ├── page.tsx      # Redirects to dashboard view
+│   │   ├── dashboard/    # Dashboard view
+│   │   └── billing/      # Billing view
 │   ├── components/       # React components
 │   │   ├── Authenticator.tsx
 │   │   ├── W3UIProvider.tsx

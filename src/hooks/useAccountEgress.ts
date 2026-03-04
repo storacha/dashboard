@@ -32,14 +32,6 @@ export function useAccountEgress(
       if (!client || !accountDID) return null
 
       return await invokeWithExpiryCheck(async () => {
-        // Create account/egress/get invocation
-        // Note: This is a simplified version - actual implementation depends on
-        // how account/egress/get capability is defined in go-libstoracha
-
-        // For now, we'll assume the capability exists and can be invoked
-        // The actual implementation may need to be adjusted based on the
-        // capability definition
-
         const capability = {
           can: 'account/egress/get' as const,
           with: accountDID as `${string}:${string}`,
@@ -56,7 +48,7 @@ export function useAccountEgress(
         const invocation = await invoke({
           issuer: client.agent.issuer,
           audience: etrackerConnection.id,
-          capability: capability as any, // Type assertion needed for custom capability
+          capability: capability as any,
           proofs: client.proofs(),
         })
 
@@ -71,7 +63,7 @@ export function useAccountEgress(
     },
     {
       revalidateOnFocus: false,
-      refreshInterval: 60000, // Refresh every minute for monitoring
+      refreshInterval: 0, // No automatic refresh
       dedupingInterval: 30000, // Dedupe requests within 30 seconds
     }
   )

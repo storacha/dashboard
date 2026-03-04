@@ -6,7 +6,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Storacha Customer Dashboard',
-  description: 'View your storage and egress usage, invoicing, and capacity metrics',
+  description: 'View your storage and egress usage, billing, and capacity metrics',
 }
 
 export default function RootLayout({
